@@ -1,0 +1,27 @@
+## this code reads the hdf5 file with in 1D array
+##based on NASA GEDI data
+
+# load the file
+gediL2B = h5py.File('C:/Username/processed_GEDI02_A_2019144182427_O02530_04_T03532_02_003_01_V002.h5', 'r')
+
+# there are 8 beam groups, to read one beam group
+group = "BEAM0000"
+no_of_records = f[group]["digital_elevation_model"].shape[0]
+print(no_of_records)
+
+#create empty dataframe
+df = pd.DataFrame()
+
+#loop over data
+for key, value in gediL2B[group].items():
+    if isinstance(value, h5py._hl.dataset.Dataset):
+        if (len(value.shape) == 1):
+            # create a new DataFrame column
+            df[key] = value[:]
+    else: # if not dataset, it's group
+        # iterate on datasets of the group
+        for key2, value2 in value.items():
+            if isinstance(value2, h5py._hl.dataset.Dataset) and len(value2.shape) == 0: # we are reading only data with 1D array
+                # create a new DataFrame column
+                df[key2] = value2[:]
+print(df.head())
